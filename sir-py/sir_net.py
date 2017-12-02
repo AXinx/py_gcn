@@ -58,7 +58,7 @@ print(nodes)
 print(edges)
 print(average_dgree)
 
-time_step = 30 #大概30步就稳定了
+time_step = 30 #大概25步就稳定了
 x_data = []
 y_data = []
 sus_r = []

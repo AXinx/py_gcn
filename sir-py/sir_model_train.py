@@ -55,7 +55,7 @@ def train(iteration):
         output = model(features, adj)
 
     los_val_ = []
-    if (iteration+1) % 29 == 0:
+    if (iteration+1) % 27 == 0:
         loss_val = F.nll_loss(output, labels)
         acc_val = accuracy(output, labels)
         los_val_.append(loss_val.data[0])
@@ -66,8 +66,8 @@ def train(iteration):
 def test(test_feature,test_label):
     model.eval()
     output = model(test_feature, adj)
-    print(output.max(1)[1].data)
-    print(test_label.data)
+    #print(output.max(1)[1].data)
+    #print(test_label.data)
     acc_test = accuracy(output, test_label)
     loss_test = F.nll_loss(output, test_label)
     print("Test set results: loss={:.4f} test acc={:.4f}".format(loss_test.data[0],acc_test.data[0]))
@@ -84,8 +84,9 @@ adj = sparse_mx_to_torch_sparse_tensor(A)
 adj = Variable(adj)
 
 # Train model
+test_num = 3
 t_total = time.time()
-train_step = time_step - 1
+train_step = time_step - test_num
 ep_avg_loss = []
 ep_avg_acc = []
 ep = []
@@ -115,16 +116,18 @@ for epoch in range(epochs):
     los_val.append(np.mean(loss_val))
     print('Epoch:{:04d} Avg Loss:{:.4f} Avg Acc:{:.4f}'.format(epoch, avg_loss, avg_acc))
 
-save_file('epoch',ep,'txt')
-save_file('avg_loss',ep_avg_loss,'txt')
-save_file('avg_acc',ep_avg_acc,'txt')
-save_file('val_loss', los_val, 'txt')
+save_file('./plot-data/epoch',ep,'txt')
+save_file('./plot-data/avg_loss',ep_avg_loss,'txt')
+save_file('./plot-data/avg_acc',ep_avg_acc,'txt')
+save_file('./plot-data/val_loss', los_val, 'txt')
 
 print("Optimization Finished!")
 print("Total time elapsed: {:.4f}s".format(time.time() - t_total))
-test_feature = np.array(x_data[train_step:][0]).reshape([nodes, 1])
-test_label = np.array(y_data[train_step:][0])
-test_feature = torch.FloatTensor(test_feature)
-test_label = torch.LongTensor(test_label)
-test_feature, test_label = Variable(test_feature), Variable(test_label)
-test(test_feature, test_label)
+
+for i in range(test_num):
+    test_feature = np.array(x_data[train_step+i:train_step+(i+1)][0]).reshape([nodes, 1])
+    test_label = np.array(y_data[train_step+i:train_step+(i+1)][0])
+    test_feature = torch.FloatTensor(test_feature)
+    test_label = torch.LongTensor(test_label)
+    test_feature, test_label = Variable(test_feature), Variable(test_label)
+    test(test_feature, test_label)
